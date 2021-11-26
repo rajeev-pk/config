@@ -1,0 +1,33 @@
+#!/bin/sh
+if [ -z "$1" ]
+then
+	read -p 'Projectname: ' PROJECTNAME
+else
+	PROJECTNAME="$1"
+fi
+
+mkdir $PROJECTNAME
+cd $PROJECTNAME
+mkdir mysql app
+cp -r ~/backup/symfonyDocker/home ~/backup/symfonyDocker/.env ~/backup/symfonyDocker/HomeController.php ~/backup/symfonyDocker/php ~/backup/symfonyDocker/container ~/backup/symfonyDocker/start ~/backup/symfonyDocker/nginx ~/backup/symfonyDocker/.dockerignore ~/backup/symfonyDocker/docker-compose.yml .
+sed -i "s/test/$PROJECTNAME/g" docker-compose.yml 
+sed -i "s/test/$PROJECTNAME/g" nginx/default.conf 
+sed -i "s/test/$PROJECTNAME/g" container 
+sed -i "s/test/$PROJECTNAME/g" HomeController.php
+sed -i "s/db_password/$PROJECTNAME/g" .env
+sed -i "s/db_name/$PROJECTNAME/g" .env
+sed -i "s/project_name/$PROJECTNAME/g" .env 
+cd ./app/
+symfony new . --full
+rm -rf .git
+cd ../
+mv HomeController.php app/src/Controller/
+mv home app/templates
+mv ./container ./app/
+rm ./app/.env
+mv ./.env ./app/
+git init 
+chmod +x start
+chmod +x ./app/container
+
+sleep 30 && ./start $PROJECTNAME 

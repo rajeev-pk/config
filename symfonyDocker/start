@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "Starting project"
+
+docker stop $(docker ps) 
+code ./app
+docker-compose up &&
+sleep 30
+firefox -new-tab "http://127.0.0.1:8000/" &&
+sleep 30 &&
+docker exec -it $1 php bin/console doctrine:database:create
+

@@ -1,0 +1,14 @@
+#!/bin/sh
+if [ -z "$1" ]
+then
+	read -p 'Projectname: ' PROJECTNAME
+else
+	PROJECTNAME="$1"
+fi
+
+mkdir $PROJECTNAME
+cd $PROJECTNAME
+mkdir mysql app
+cp -r ~/backup/symfonyDocker/php ~/backup/symfonyDocker/nginx ~/backup/symfonyDocker/.dockerignore ~/backup/symfonyDocker/docker-compose.yml .
+sed -i "s/test/$PROJECTNAME/g" docker-compose.yml 
+sed -i "s/test/$PROJECTNAME/g" nginx/default.conf 

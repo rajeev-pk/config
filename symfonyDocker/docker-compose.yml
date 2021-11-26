@@ -1,0 +1,75 @@
+version: '3'
+
+networks:
+  nginx-php74-msql-test:
+
+services:
+
+  # nginx
+  nginx-service-test:
+
+    # gets stable nginx image
+
+    image: nginx:stable-alpine
+    container_name: nginx-container-test
+    ports:
+      - "8000:80"
+
+    # maps local dir too container dirs
+
+    volumes:
+      - ./app:/var/www/project
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+    # starts up before nginx
+
+    depends_on:
+      - php74-service-test
+      - mysql-service-test
+    networks:
+      - nginx-php74-msql-test
+
+  # php
+  php74-service-test:
+    build:
+      context: .
+      dockerfile: ./php/Dockerfile
+    container_name: php74-container-test
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./app:/var/www/project
+    networks:
+      - nginx-php74-msql-test
+
+  # mysql
+  mysql-service-test:
+    image: mysql:8
+    container_name: mysql-container-test
+    environment:
+      MYSQL_USER: test-dev
+      MYSQL_ROOT_PASSWORD: test12345
+      MYSQL_PASSWORD: test12345
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - nginx-php74-msql-test
+
+  phpmyadmin-service-test:
+    depends_on:
+      - mysql-service-test
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-container-test
+    environment:
+      - PMA_HOST=mysql-service-test
+      - PMA_USER=root
+      - PMA_PASSWORD=test12345
+      - MYSQL_ROOT_PASSWORD=test12345
+      - UPLOAD_LIMIT=262144000
+    ports:
+      - 80:80
+    networks:
+      - nginx-php74-msql-test
+
